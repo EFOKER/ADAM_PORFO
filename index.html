@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>High Tech Portfolio - M Adam Ali</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Poppins:wght@300;500&display=swap');
+
+    /* Reset */
+    * {
+      box-sizing: border-box;
+      margin: 0; padding: 0;
+      font-family: 'Poppins', sans-serif;
+      scroll-behavior: smooth;
+      user-select: none;
+    }
+    html, body {
+      height: 100%;
+      background: #0d0f14;
+      color: #cfd9e9;
+      overflow-x: hidden;
+    }
+    ::selection {
+      background: #59f0ff;
+      color: #0d0f14;
+    }
+    /* Neon glow helper */
+    .neon-glow {
+      text-shadow:
+        0 0 5px #59f0ff,
+        0 0 10px #59f0ff,
+        0 0 20px #59f0ff,
+        0 0 40px #2efcff;
+    }
+    /* Header */
+    header {
+      position: sticky;
+      top: 0;
+      background: #12141a;
+      border-bottom: 2px solid #2efcff;
+      box-shadow: 0 0 15px #2efcff88;
+      z-index: 100;
+      padding: 1.5rem 2rem;
+      user-select:none;
+      backdrop-filter: saturate(200%) blur(10px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: 2rem;
+      color: #2efcff;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: default;
+      user-select:none;
+      position: relative;
+      animation: glitch 2.5s infinite;
+    }
+    @keyframes glitch {
+      0% {
+        text-shadow:
+          2px 0 #59f0ff,
+          -2px 0 #2efcff;
+      }
+      33% {
+        text-shadow:
+          -2px 0 #59f0ff,
+          2px 0 #2efcff;
+      }
+      66% {
+        text-shadow:
+          2px 0 #2efcff,
+          -2px 0 #59f0ff;
+      }
+      100% {
+        text-shadow:
+          2px 0 #59f0ff,
+          -2px 0 #2efcff;
+      }
+    }
+    nav {
+      display: flex;
+      gap: 1.8rem;
+    }
+    nav a {
+      color: #58d6ffaa;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      position: relative;
+      text-decoration: none;
+      font-size: 1rem;
+      padding-bottom: 4px;
+      transition: color 0.3s ease;
+      cursor: pointer;
+    }
+    nav a::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 3px;
+      bottom: 0;
+      left: 0;
+      background: #2efcff;
+      box-shadow: 0 0 8px #2efcff50;
+      transition: width 0.3s ease;
+      border-radius: 2px;
+      filter: drop-shadow(0 0 4px #2efcff);
+      opacity: 0.8;
+    }
+    nav a:hover,
+    nav a:focus,
+    nav a.active {
+      color: #2efcff;
+    }
+    nav a:hover::after,
+    nav a:focus::after,
+    nav a.active::after {
+      width: 100%;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 3rem auto 4rem auto;
+      padding: 0 2rem;
+    }
+    section {
+      margin-bottom: 5rem;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: 
+        opacity 0.8s ease-out,
+        transform 0.8s ease-out;
+    }
+    section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    section h2 {
+      font-family: 'Orbitron', monospace;
+      font-weight: 600;
+      font-size: 2.5rem;
+      color: #2efcff;
+      margin-bottom: 1rem;
+      border-bottom: 3px solid #2efcff;
+      display: inline-block;
+      padding-bottom: 0.25rem;
+      letter-spacing: 0.07em;
+      user-select:none;
+      text-transform: uppercase;
+    }
+    #home {
+      text-align: center;
+      margin-top: 4rem;
+    }
+    #home h3 {
+      font-weight: 300;
+      font-size: 1.35rem;
+      margin-bottom: 1.3rem;
+      color: #8ad3ffdd;
+      font-style: italic;
+      user-select:none;
+    }
+    #home p {
+      font-size: 1.2rem;
+      max-width: 600px;
+      margin: 0 auto;
+      color: #a1bbffdd;
+      user-select:none;
+    }
+    #about p {
+      font-size: 1.15rem;
+      color: #a3bdeedd;
+      user-select:none;
+      line-height: 1.5;
+    }
+    #about .info {
+      margin-top: 1rem;
+      font-size: 1rem;
+      color: #a1bbffdd;
+    }
+    #projects .project-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(280px,1fr));
+      gap: 2rem;
+    }
+    .project {
+      background: #11131a;
+      border-radius: 15px;
+      border: 1px solid #2efcff44;
+      padding: 1.8rem 2rem;
+      box-shadow:
+        0 0 10px #2efcff50,
+        inset 0 0 15px #0f354e80;
+      color: #9bf0ffdd;
+      cursor: pointer;
+      transition: 
+        box-shadow 0.3s ease,
+        transform 0.3s ease;
+      user-select:none;
+      position: relative;
+      overflow: hidden;
+    }
+    .project:hover, .project:focus {
+      box-shadow:
+        0 0 18px #2efcffcc,
+        inset 0 0 22px #0f354eaa,
+        0 0 30px #2efcfff2;
+      transform: translateY(-12px) scale(1.03);
+      outline: none;
+      z-index: 10;
+      border-color: #2efcffaa;
+    }
+    .project h3 {
+      margin-bottom: 0.8rem;
+      color: #2efcff;
+      font-family: 'Orbitron', monospace;
+      font-size: 1.5rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      user-select:none;
+      transition: color 0.2s;
+    }
+    .project p {
+      font-size: 1.05rem;
+      color: #7edcffcc;
+      user-select:none;
+      line-height: 1.4;
+      font-weight: 500;
+    }
+    #contact form {
+      max-width: 440px;
+      margin: 0 auto;
+      text-align: left;
+      user-select:none;
+    }
+    #contact label {
+      display: block;
+      margin-bottom: 0.3rem;
+      font-weight: 700;
+      color: #2efcffcc;
+      letter-spacing: 0.05em;
+      font-size: 1rem;
+      user-select:none;
+    }
+    #contact input, #contact textarea {
+      width: 100%;
+      background: #12141a;
+      color: #a1bbffdd;
+      border: 2px solid #2efcff55;
+      border-radius: 12px;
+      padding: 0.9rem 1.2rem;
+      margin-bottom: 1.3rem;
+      font-size: 1rem;
+      font-weight: 500;
+      font-family: 'Poppins', sans-serif;
+      transition: 
+        border-color 0.3s ease,
+        box-shadow 0.3s ease;
+      user-select:text;
+    }
+    #contact input:focus, #contact textarea:focus {
+      border-color: #2efcffcc;
+      outline: none;
+      box-shadow: 0 0 12px 2px #2efcff99;
+    }
+    #contact textarea {
+      resize: vertical;
+      min-height: 100px;
+      font-family: 'Poppins', sans-serif;
+    }
+    #contact button {
+      background: #2efcff;
+      border: none;
+      color: #0d0f14;
+      padding: 0.85rem 2rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-radius: 20px;
+      cursor: pointer;
+      letter-spacing: 0.06em;
+      user-select:none;
+      box-shadow:
+        0 0 20px #2efcffaa;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+      font-family: 'Orbitron', monospace;
+      text-transform: uppercase;
+    }
+    #contact button:hover,
+    #contact button:focus {
+      background: #1cc9ff;
+      box-shadow:
+        0 0 30px #33e9ffcc,
+        0 0 40px #33e9ffcc,
+        0 0 60px #33e9ffcc;
+      outline: none;
+    }
+    #formMessage {
+      color: #33ff99;
+      font-weight: 700;
+      margin-top: 1.1rem;
+      text-align:center;
+      min-height: 24px;
+      user-select:none;
+    }
+    footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #2efcff99;
+      letter-spacing: 0.12em;
+      user-select:none;
+      border-top: 1px solid #2efcff33;
+      text-transform: uppercase;
+      font-family: 'Orbitron', monospace;
+    }
+
+    /* Tooltip on project cards showing "Click to see more" */
+    .project::after {
+      content: "Click to see more";
+      position: absolute;
+      bottom: 10px;
+      right: 12px;
+      font-size: 0.75rem;
+      color: #2efcff88;
+      font-weight: 600;
+      font-family: 'Orbitron', monospace;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      user-select:none;
+      letter-spacing: 0.05em;
+    }
+    .project:hover::after,
+    .project:focus::after {
+      opacity: 1;
+    }
+
+  </style>
+</head>
+<body>
+  <header role="banner">
+    <h1 aria-label="M Adam Ali Portfolio">M ADAM ALI</h1>
+    <nav role="navigation" aria-label="Primary">
+      <a href="#home" class="active">Home</a>
+      <a href="#about">About Me</a>
+      <a href="#projects">Projects</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+  <main>
+    <section id="home" tabindex="-1" role="region" aria-labelledby="home-title">
+      <h2 id="home-title">Welcome</h2>
+      <h3>High School Coder & Creative Technophile</h3>
+      <p>Exploring the future of technology with passion and precision. This portfolio showcases my journey and the projects I've crafted along the way.</p>
+    </section>
+
+    <section id="about" tabindex="-1" role="region" aria-labelledby="about-title">
+      <h2 id="about-title">About Me</h2>
+      <p>Hi! I’m M Adam Ali, a curious high school student fascinated by games development and innovative tech solutions. I’m continuously pushing my boundaries by experimenting with code, AI concepts, and game development. When I’m not had project to do,i might just watch some sci-fi,mech, anime or movie.</p>
+      <div class="info">
+        <strong>Location:</strong> Lampung-pesawaran-gedong_tataan-D(2)<br />
+        <strong>Birthday:</strong> 10th November 2008<br />
+        <strong>Skills:</strong> HTML,CS,rpgm MV,base english communication<br />
+        <strong>Hobbies:</strong> boxing,video games.
+      </div>
+    </section>
+
+    <section id="projects" tabindex="-1" role="region" aria-labelledby="projects-title">
+      <h2 id="projects-title">Projects</h2>
+      <div class="project-list" role="list">
+        <article class="project" tabindex="0" role="listitem" aria-label="Smart Calculator Project">
+          <h3><a href="space.html">SPACE dSHOOTER</a></h3>
+          <p>space themed games where you should defend the line and shoot down enemies, there is some power orb you can obtain to help you defend your line</p>
+        </article>
+        <article class="project" tabindex="0" role="listitem" aria-label="Live Weather Dashboard Project">
+          <h3><a href="Watch Your Step!.html">Watch YOUR STEP!!</a></h3>
+          <p>games based on </p>
+        </article>
+    </section>
+
+    <section id="contact" tabindex="-1" role="region" aria-labelledby="contact-title">
+      <h2 id="contact-title">Contact Me</h2>
+      <form id="contactForm" onsubmit="submitForm(event)" aria-describedby="formMessage" aria-live="polite" novalidate>
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" aria-required="true" placeholder="Your full name" required autocomplete="name" />
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" aria-required="true" placeholder="you@example.com" required autocomplete="email" />
+        <label for="message">Message</label>
+        <textarea id="message" name="message" rows="5" placeholder="Your message here..." aria-required="true" required></textarea>
+        <button type="submit" aria-label="Send your message">Send Message</button>
+      </form>
+      <p id="formMessage" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <footer role="contentinfo">
+    &copy; 2025 M Adam Ali. All rights reserved.
+  </footer>
+
+  <script>
+    // Scroll animation - reveal sections
+    const sections = document.querySelectorAll('section');
+    const options = {
+      threshold: 0.15
+    };
+
+    const observer = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, options);
+
+    sections.forEach(section => {
+      observer.observe(section);
+    });
+
+    // Nav active link switching
+    const navLinks = document.querySelectorAll('nav a');
+    window.addEventListener('scroll', () => {
+      let fromTop = window.scrollY + 80;
+      navLinks.forEach(link => {
+        let section = document.querySelector(link.hash);
+        if (section.offsetTop <= fromTop && (section.offsetTop + section.offsetHeight) > fromTop) {
+          link.classList.add('active');
+        } else {
+          link.classList.remove('active');
+        }
+      });
+    });
+
+    // Contact form submit handler
+    function submitForm(event) {
+      event.preventDefault();
+      const form = event.target;
+      const name = form.name.value.trim();
+      const email = form.email.value.trim();
+      const message = form.message.value.trim();
+      const formMessage = document.getElementById('formMessage');
+
+      // Very basic validation
+      if (!name || !email || !message) {
+        formMessage.style.color = '#ff3864';
+        formMessage.textContent = 'Please fill in all fields.';
+        return;
+      }
+      // Simple email regex validation
+      const emailValid = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+      if (!emailValid) {
+        formMessage.style.color = '#ff3864';
+        formMessage.textContent = 'Please enter a valid email address.';
+        return;
+      }
+
+      // Simulate sending message
+      formMessage.style.color = '#33ff99';
+      formMessage.textContent = `Thank you, ${name}! Your message has been sent.`;
+
+      form.reset();
+    }
+  </script>
+</body>
+</html>
+

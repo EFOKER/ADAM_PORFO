@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Watch your STEP!</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron&display=swap');
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: linear-gradient(135deg, #1f202c, #23242f);
+    font-family: 'Orbitron', monospace, sans-serif;
+    color: #e0f7fa;
+    user-select: none;
+    overflow: hidden;
+  }
+  #game-container {
+    max-width: 600px;
+    margin: 20px auto;
+    background: #2c2f45;
+    border-radius: 16px;
+    box-shadow:
+      0 0 20px #00ffc3,
+      inset 0 0 15px #008f82;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    position: relative;
+    outline: none;
+  }
+  #title {
+    font-size: 2.5rem;
+    letter-spacing: 6px;
+    margin-bottom: 10px;
+    color: #00ffc3;
+    text-shadow: 0 0 12px #00e6b0;
+  }
+  #scoreboard {
+    font-size: 1.3rem;
+    margin-bottom: 12px;
+    color: #4dffde;
+    text-shadow: 0 0 10px #4dffdeaa;
+    user-select: text;
+  }
+  #grid {
+    display: grid;
+    grid-template-columns: repeat(8, 64px);
+    grid-template-rows: repeat(8, 64px);
+    gap: 6px;
+    background: #12151f;
+    border-radius: 12px;
+    box-shadow:
+      inset 0 0 20px #00ffc350;
+    user-select: none;
+    position: relative;
+  }
+  .tile {
+    width: 64px;
+    height: 64px;
+    border-radius: 10px;
+    background: #3a415b;
+    box-shadow:
+      inset 0 3px 7px #4f5782,
+      0 2px 5px #121622;
+    transition: background-color 0.3s ease;
+    position: relative;
+  }
+  .tile.safe {
+    background: #2a2e43;
+  }
+  .tile.bomb {
+    background: #972727;
+    box-shadow:
+      inset 0 4px 9px #d93131,
+      0 0 12px #ff3b3bcc;
+  }
+  .tile.endpoint {
+    background: #286242;
+    box-shadow:
+      inset 0 4px 8px #3ddc71,
+      0 0 18px #27ff73cc;
+  }
+  .tile.revealed.safe {
+    background: #0b8f8f;
+    box-shadow: 0 0 20px #1deaea;
+  }
+  .tile.revealed.bomb {
+    background: #d32f2f;
+    box-shadow: 0 0 25px #ff5252;
+  }
+  .tile.revealed.endpoint {
+    background: #00e676;
+    box-shadow: 0 0 28px #00ff99;
+  }
+  /* Player styles */
+  #player {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: radial-gradient(circle at center, #00fff2, #008f82);
+    border-radius: 14px;
+    box-shadow:
+      0 0 15px #00ffc3,
+      0 0 25px #00e6b0 inset;
+    pointer-events: none;
+    transition: transform 0.2s ease;
+    z-index: 15;
+  }
+  /* Menu and death screen overlays */
+  .overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    color: #00e0ca;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    backdrop-filter: blur(6px);
+    text-align: center;
+  }
+  .overlay h1 {
+    margin: 0 0 1rem 0;
+    font-size: 3rem;
+    letter-spacing: 5px;
+    text-shadow: 0 0 15px #00e0ca;
+  }
+  .overlay p {
+    font-size: 1.2rem;
+    max-width: 320px;
+    margin-bottom: 1.5rem;
+    color: #00e0caaa;
+  }
+  .overlay button {
+    padding: 0.8rem 2.4rem;
+    font-size: 1.2rem;
+    border-radius: 14px;
+    border: none;
+    background: #14fff2;
+    color: #05403d;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 15px #14fff2;
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+    user-select: none;
+  }
+  .overlay button:hover,
+  .overlay button:focus {
+    background: #08c1b9;
+    box-shadow: 0 0 20px #08c1b9;
+    outline: none;
+  }
+  #particles {
+    pointer-events: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 50;
+    overflow: visible;
+  }
+  /* Particle style */
+  .particle {
+    position: fixed;
+    border-radius: 50%;
+    opacity: 1;
+    pointer-events: none;
+    will-change: transform, opacity;
+  }
+</style>
+</head>
+<body>
+<div id="game-container" tabindex="0" aria-label="Tile Bomb Walker Game">
+  <div id="title">TILE BOMB WALKER</div>
+  <div id="scoreboard" aria-live="polite" aria-atomic="true">Score: 0 | High Score: 0</div>
+  <div id="grid" role="grid" aria-label="Game tiles grid"></div>
+  <div id="player" aria-hidden="true"></div>
+</div>
+
+<div id="menu-screen" class="overlay" role="dialog" aria-modal="true" aria-labelledby="menu-title">
+  <h1 id="menu-title">TILE BOMB WALKER</h1>
+  <p>Walk on NEW tiles only to score. Avoid bombs (red).<br>
+    Reaching the green tile finishes the game. Touching bombs ends game with half points.</p>
+  <button id="start-button" aria-label="Start Game">Start Game</button>
+</div>
+
+<div id="death-screen" class="overlay" role="alertdialog" aria-modal="true" aria-labelledby="death-title" style="display:none;">
+  <h1 id="death-title">Game Over!</h1>
+  <p id="final-score"></p>
+  <button id="restart-button" aria-label="Restart Game">Restart</button>
+</div>
+
+<div id="particles"></div>
+
+<script>
+(() => {
+  // Game constants
+  const gridSize = 8;
+  const bombCount = 10; // bombs count per game
+
+  // DOM refs
+  const gameContainer = document.getElementById('game-container');
+  const gridEl = document.getElementById('grid');
+  const playerEl = document.getElementById('player');
+  const scoreBoard = document.getElementById('scoreboard');
+  const particlesEl = document.getElementById('particles');
+  const menuScreen = document.getElementById('menu-screen');
+  const deathScreen = document.getElementById('death-screen');
+  const finalScoreEl = document.getElementById('final-score');
+  const startBtn = document.getElementById('start-button');
+  const restartBtn = document.getElementById('restart-button');
+
+  // Game state
+  let bombs = new Set();
+  let visited = new Set();
+  let endpoint = { x: 0, y: 0 };
+  let playerPos = { x: 0, y: 0 };
+  let score = 0;
+  let playing = false;
+  let highScore = 0;
+
+  let tiles = [];
+
+  // Load high score from localStorage or default 0
+  function loadHighScore() {
+    const stored = localStorage.getItem('tile_bomb_walker_highscore');
+    highScore = stored ? parseInt(stored, 10) : 0;
+  }
+
+  // Save high score to localStorage
+  function saveHighScore() {
+    localStorage.setItem('tile_bomb_walker_highscore', highScore.toString());
+  }
+
+  // Create grid tiles with proper classes and roles
+  function createGrid() {
+    gridEl.innerHTML = '';
+    tiles = [];
+    for(let y=0; y<gridSize; y++) {
+      for(let x=0; x<gridSize; x++) {
+        const tile = document.createElement('div');
+        tile.classList.add('tile', 'safe');
+        tile.style.gridColumnStart = x + 1;
+        tile.style.gridRowStart = y + 1;
+        tile.dataset.x = x;
+        tile.dataset.y = y;
+        tile.setAttribute('role', 'gridcell');
+        tile.setAttribute('aria-label', `Tile (${x+1}, ${y+1})`);
+        gridEl.appendChild(tile);
+        tiles.push(tile);
+      }
+    }
+  }
+
+  // Place bombs and endpoint on grid
+  function placeBombsAndEndpoint() {
+    bombs.clear();
+
+    // Place bombs randomly excluding start (0,0)
+    while(bombs.size < bombCount) {
+      const x = Math.floor(Math.random() * gridSize);
+      const y = Math.floor(Math.random() * gridSize);
+      if((x === 0 && y === 0) || bombs.has(`${x},${y}`)) continue;
+      bombs.add(`${x},${y}`);
+    }
+
+    // Place endpoint - find a tile not bomb and not start
+    do {
+      endpoint.x = Math.floor(Math.random() * gridSize);
+      endpoint.y = Math.floor(Math.random() * gridSize);
+    } while (
+      (endpoint.x === 0 && endpoint.y === 0) ||
+      bombs.has(`${endpoint.x},${endpoint.y}`)
+    );
+
+    // Update tile classes
+    tiles.forEach(tile => {
+      const key = `${tile.dataset.x},${tile.dataset.y}`;
+      tile.classList.remove('bomb', 'endpoint', 'revealed', 'safe', 'score-new');
+      if(bombs.has(key)) {
+        tile.classList.add('bomb');
+      } else if (parseInt(tile.dataset.x) === endpoint.x && parseInt(tile.dataset.y) === endpoint.y) {
+        tile.classList.add('endpoint');
+      } else {
+        tile.classList.add('safe');
+      }
+    });
+  }
+
+  // Update player position visually
+  function updatePlayerPosition() {
+    const px = playerPos.x * 70 + 7;
+    const py = playerPos.y * 70 + 7;
+    playerEl.style.transform = `translate(${px}px, ${py}px)`;
+  }
+
+  // Update scoreboard with current and high score
+  function updateScoreboard() {
+    scoreBoard.textContent = `Score: ${score} | High Score: ${highScore}`;
+  }
+
+  // Reveal tile once player steps on it, with bomb or endpoint consideration
+  function revealTile(x, y) {
+    const key = `${x},${y}`;
+    if(visited.has(key)) return false;
+    visited.add(key);
+
+    const tile = tiles.find(t => t.dataset.x == x && t.dataset.y == y);
+    if(!tile) return false;
+
+    if(bombs.has(key)) {
+      tile.classList.add('revealed', 'bomb');
+    } else if(x === endpoint.x && y === endpoint.y) {
+      tile.classList.add('revealed', 'endpoint');
+    } else {
+      tile.classList.add('revealed', 'safe');
+    }
+    return true;
+  }
+
+  // Particle effect for death
+  function createDeathParticles(x, y) {
+    const rect = gridEl.getBoundingClientRect();
+    const centerX = rect.left + x * 70 + 35;
+    const centerY = rect.top + y * 70 + 35;
+    const particleCount = 25;
+
+    for(let i=0; i<particleCount; i++) {
+      const particle = document.createElement('div');
+      particle.classList.add('particle');
+
+      const size = (Math.random() * 7) + 5;
+      particle.style.width = `${size}px`;
+      particle.style.height = `${size}px`;
+      particle.style.background = `hsl(${Math.random() * 60}, 100%, 60%)`;
+
+      particle.style.left = `${centerX}px`;
+      particle.style.top = `${centerY}px`;
+
+      particlesEl.appendChild(particle);
+
+      const angle = Math.random() * 2 * Math.PI;
+      const distance = (Math.random() * 150) + 50;
+      const duration = (Math.random() * 600) + 800;
+
+      const start = performance.now();
+
+      function animate(time) {
+        const elapsed = time - start;
+        if(elapsed > duration) {
+          particle.remove();
+          return;
+        }
+        const progress = elapsed / duration;
+        const xPos = Math.cos(angle) * distance * progress;
+        const yPos = Math.sin(angle) * distance * progress;
+        particle.style.transform = `translate(${xPos}px, ${yPos}px) scale(${1 - progress})`;
+        particle.style.opacity = `${1 - progress}`;
+        requestAnimationFrame(animate);
+      }
+      requestAnimationFrame(animate);
+    }
+  }
+
+  // Trigger game over after touching bomb: half score awarded
+  function triggerBombDeath() {
+    playing = false;
+    playerEl.style.display = 'none';
+    score = Math.floor(score / 2);
+    if(score > highScore) {
+      highScore = score;
+      saveHighScore();
+    }
+    finalScoreEl.innerHTML = `You stepped on a bomb!<br>Your final score is ${score}`;
+    deathScreen.style.display = 'flex';
+    createDeathParticles(playerPos.x, playerPos.y);
+  }
+
+  // Trigger game success after reaching endpoint
+  function triggerSuccess() {
+    playing = false;
+    playerEl.style.display = 'none';
+    if(score > highScore) {
+      highScore = score;
+      saveHighScore();
+    }
+    finalScoreEl.innerHTML = `You reached the endpoint!<br>Your final score is ${score}`;
+    deathScreen.style.display = 'flex';
+  }
+
+  // Move player if playing and inside grid
+  function movePlayer(dx, dy) {
+    if(!playing) return;
+    const nx = playerPos.x + dx;
+    const ny = playerPos.y + dy;
+    if(nx < 0 || ny < 0 || nx >= gridSize || ny >= gridSize) return;
+
+    playerPos = { x: nx, y: ny };
+    updatePlayerPosition();
+
+    // Reveal tile, add score only for new tiles
+    const newTileVisited = revealTile(nx, ny);
+
+    // End conditions
+    const key = `${nx},${ny}`;
+    if (bombs.has(key)) {
+      if(newTileVisited) score++;  // Score for stepping on new bomb tile also before halving
+      updateScoreboard();
+      triggerBombDeath();
+    } else if (nx === endpoint.x && ny === endpoint.y) {
+      if(newTileVisited) score++;
+      updateScoreboard();
+      triggerSuccess();
+    } else {
+      if(newTileVisited) {
+        score++;
+        updateScoreboard();
+      }
+    }
+  }
+
+  // Keyboard controls
+  function handleKey(e) {
+    if(!playing) return;
+    switch(e.key) {
+      case 'ArrowUp':
+      case 'w':
+      case 'W':
+        movePlayer(0, -1);
+        e.preventDefault();
+        break;
+      case 'ArrowDown':
+      case 's':
+      case 'S':
+        movePlayer(0, 1);
+        e.preventDefault();
+        break;
+      case 'ArrowLeft':
+      case 'a':
+      case 'A':
+        movePlayer(-1, 0);
+        e.preventDefault();
+        break;
+      case 'ArrowRight':
+      case 'd':
+      case 'D':
+        movePlayer(1, 0);
+        e.preventDefault();
+        break;
+    }
+  }
+
+  // Start/reset game state
+  function startGame() {
+    score = 0;
+    visited.clear();
+    playerPos = { x: 0, y: 0 };
+    playing = true;
+
+    createGrid();
+    placeBombsAndEndpoint();
+    updatePlayerPosition();
+    revealTile(0, 0);
+    updateScoreboard();
+    playerEl.style.display = 'block';
+
+    menuScreen.style.display = 'none';
+    deathScreen.style.display = 'none';
+
+    gameContainer.focus();
+  }
+
+  // Setup event listeners, load high score
+  function setup() {
+    loadHighScore();
+    startBtn.addEventListener('click', startGame);
+    restartBtn.addEventListener('click', startGame);
+    gameContainer.addEventListener('keydown', handleKey);
+    updateScoreboard();
+  }
+
+  window.addEventListener('load', () => {
+    setup();
+    menuScreen.style.display = 'flex';
+    deathScreen.style.display = 'none';
+    playerEl.style.display = 'none';
+  });
+
+})();
+</script>
+</body>
+</html>
+
